@@ -1,3 +1,5 @@
+#URL de acceso al sistema
+
 """
 URL configuration for blb_django project.
 
@@ -17,6 +19,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+#Define la url para acceder a determinado sitio
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]

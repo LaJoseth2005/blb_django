@@ -23,8 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-s*p_2s^noc+f-sk)_+ytnar7snq3_98-*b1y@=5&nvtx4e-wvc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+#Darnos info como desarrolladores de cual es o cuando esta el error, SIEMPRE EN TRUE
 DEBUG = True
 
+#Aqui permite a paginas usar la nuestra, si no entra aqui no esta permitido
+#Lo mejor es permitir a local host
 ALLOWED_HOSTS = []
 
 
@@ -37,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'gestion'
 ]
 
 MIDDLEWARE = [
@@ -104,8 +108,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+#Time zone es el cambio a hora local, si yo tengo el cambio a las 8am aca y en galapagos son las 7am,
+#en galapagos se ve a las 7am
 TIME_ZONE = 'UTC'
 
+#Configuracion de idiomas
 USE_I18N = True
 
 USE_TZ = True
@@ -113,10 +120,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+#Donde estan imagenes o cosas estaticas, cosas que no cambian
 
 STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+#Configura los archivos autoincrementables
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,0 +1,37 @@
+{% extends "index.html" %}
+
+{% block contenido %}
+<h2> PRESTAMOS </h2>
+<table style="border: 1px solid">
+    <tr style="border: 1px solid">
+        <td style="border: 1px solid">Libro</td>
+        <td style="border: 1px solid">Usuario</td>
+        <td style="border: 1px solid">Fecha_Prestamo</td>
+        <td style="border: 1px solid">Fecha_max</td>
+        <td style="border: 1px solid">Fecha_devolucion</td>
+        <td style="border: 1px solid">Bibliografia</td>
+    </tr>
+    {% for prestamo in prestamos %}
+    <tr style="border: 1px solid">
+        <td style="border: 1px solid">
+            {{ prestamo.libro }}
+        </td>
+        <td style="border: 1px solid">
+            {{ prestamo.usuario }}
+        </td>
+        <td style="border: 1px solid">
+            {{ prestamo.fecha_prestamo}}
+        </td>
+        <td style="border: 1px solid">
+            {{ prestamo.fecha_max }}
+        </td>
+        <td style="border: 1px solid">
+            {{ prestamo.fecha_devolucion }}
+        </td>
+        <td style="border: 1px solid">
+            {{ prestamo.bibliografia}}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

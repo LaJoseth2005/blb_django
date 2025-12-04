@@ -11,6 +11,8 @@ def index(request):
     return render(request, 'gestion/templates/home.html', {'titulo': title})
 
 def lista_libros(request):
+    libros = Libro.objects.all()
+    return render(request, 'gestion/templates/libros.html', {'libros': libros})
     pass
 
 def crear_libros(request):
@@ -25,6 +27,8 @@ def crear_autores(request):
     pass
 
 def lista_prestamo(request):
+    prestamo = Prestamo.objects.all()
+    return render(request, 'gestion/templates/prestamo.html', {'prestamo': prestamo})
     pass
 
 def crear_prestamo(request):
@@ -34,6 +38,8 @@ def detalle_prestamo(request):
     pass
 
 def lista_multas(request):
+    multas = Multa.objects.all()
+    return render(request, 'gestion/templates/multas.html', {'multas': multas})
     pass
 
 def crear_multas(request):

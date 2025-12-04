@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+
+{% block contenido %}
+<h2> MULTAS </h2>
+<table style="border: 1px solid">
+    <tr style="border: 1px solid">
+        <td style="border: 1px solid">Prestamo</td>
+        <td style="border: 1px solid">Tipo</td>
+        <td style="border: 1px solid">Monto</td>
+        <td style="border: 1px solid">Pagada</td>
+        <td style="border: 1px solid">Fecha</td>
+    </tr>
+    {% for multa in multas %}
+    <tr style="border: 1px solid">
+        <td style="border: 1px solid">
+            {{ multa.prestamo }}
+        </td>
+        <td style="border: 1px solid">
+            {{ multa.tipo }}
+        </td>
+        <td style="border: 1px solid">
+            {{ multa.monto}}
+        </td>
+        <td style="border: 1px solid">
+            {{ multa.pagada }}
+        </td>
+        <td style="border: 1px solid">
+            {{ multa.fecha}}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

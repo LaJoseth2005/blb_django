@@ -15,7 +15,9 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-TITLE = "UTE 2 semestre"
+TITLE = "UTE 2 semestre desarrollo de software"
+
+MULTA = 0.5
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -29,7 +31,7 @@ DEBUG = True
 
 #Aqui permite a paginas usar la nuestra, si no entra aqui no esta permitido
 #Lo mejor es permitir a local host
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -107,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-ES'
 
 #Time zone es el cambio a hora local, si yo tengo el cambio a las 8am aca y en galapagos son las 7am,
 #en galapagos se ve a las 7am

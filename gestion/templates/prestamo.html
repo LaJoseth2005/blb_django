@@ -9,7 +9,8 @@
         <td style="border: 1px solid">Fecha_Prestamo</td>
         <td style="border: 1px solid">Fecha_max</td>
         <td style="border: 1px solid">Fecha_devolucion</td>
-        <td style="border: 1px solid">Bibliografia</td>
+        <td style="border: 1px solid">Dias_retraso</td>
+        <td style="border: 1px solid">Multa_retraso</td>
     </tr>
     {% for prestamo in prestamos %}
     <tr style="border: 1px solid">
@@ -29,7 +30,10 @@
             {{ prestamo.fecha_devolucion }}
         </td>
         <td style="border: 1px solid">
-            {{ prestamo.bibliografia}}
+            {{ prestamo.dias_retraso}}
+        </td>
+        <td style="border: 1px solid">
+            {{ prestamo.multa_retraso}}
         </td>
     </tr>
     {% endfor %}

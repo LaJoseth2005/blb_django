@@ -18,7 +18,7 @@ class Libro(models.Model):
     disponible = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.titulo
+        return f"{self.titulo} {self.autor}"
     
 class Prestamo(models.Model):
     libro = models.ForeignKey(Libro, related_name="prestamos", on_delete=models.PROTECT)
@@ -40,8 +40,6 @@ class Prestamo(models.Model):
     @property
     def multa_retraso(self):
         tarifa = 0.50
-
-    def dias_retraso(self):
         return self.dias_retraso * tarifa
     
 class Multa(models.Model):

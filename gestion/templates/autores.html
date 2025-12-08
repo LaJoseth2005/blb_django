@@ -19,6 +19,9 @@
         <td style="border: 1px solid">
             {{ autor.bibliografia}}
         </td>
+        <td>
+            <a href="{% url 'editar_autor' autor.id%}">Editar</a>
+        </td>
     </tr>
     {% endfor %}
 </table>

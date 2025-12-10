@@ -27,6 +27,12 @@ class Prestamo(models.Model):
     fecha_max = models.DateField()
     fecha_devolucion = models.DateField(blank=True, null=True) #me permita crear con datos en blanco o null
 
+    class Meta:
+        permissions = (
+            ("Vert_Prestamos", "Puede ver prestamos"),
+            ("Gestionar_Prestamos", "Puede gestionar prestamos"),
+        )
+
     def __str__(self):
         return f"prestamo de {self.libro} a {self.usuario}"
     

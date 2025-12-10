@@ -35,6 +35,24 @@
           <li class="nav-item">
             <a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Préstamos</a>
           </li>
+
+          {% if not user.is_authenticated %}
+          <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <li class="'nav-item">
+              <button type="submit">Ingresar</button>
+            </li>
+          </form>
+          {% endif %}
+
+          {% if user.is_authenticated %}
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <li class="'nav-item">
+              <button type="submit">Cerrar Sesión</button>
+            </li>
+          </form>
+          {% endif %}
         </ul>
       </div>
     </div>

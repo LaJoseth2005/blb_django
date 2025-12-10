@@ -1,8 +1,20 @@
 from django.urls import path
 from .views import *
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("", index, name="index"),
+
+    #Gestion Usuarios
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/',auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+
+    #Cambio de contraseña
+    path('password/change', auth_views.PasswordChangeView.as_view(), name="password_change"),
+    path('passwprd/change/done', auth_views.PasswordChangeDoneView.as_view(), name="password_change_done"),
+
+    #Registro
+    path('registro/', registro, name="registro"),
     
     #libros
     path('libros/', lista_libros, name="lista_libros"),

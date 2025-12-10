@@ -132,3 +132,6 @@ STATIC_URL = 'static/'
 #Configura los archivos autoincrementables
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = 'index'
+LOGIN_URL = "login"

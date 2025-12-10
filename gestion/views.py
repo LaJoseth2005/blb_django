@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.http import HttpResponseForbidden
 from django.contrib.auth.models import User
+from django.contrib.auth import login
 from django.utils import timezone
 from django.conf import settings
 
@@ -30,6 +33,7 @@ def lista_autores(request):
     autores = Autor.objects.all()
     return render(request, 'gestion/templates/autores.html', {'autores': autores})
 
+@login_required
 def crear_autores(request, id=None):
     if id == None:
         autor = None
@@ -60,7 +64,10 @@ def lista_prestamo(request):
     prestamo = Prestamo.objects.all()
     return render(request, 'gestion/templates/prestamo.html', {'prestamo': prestamo})
 
+@login_required
 def crear_prestamo(request):
+    if not request.user.has_perm('gestion.gestionar_prestamos'):
+        return HttpResponseForbidden()
     libro = Libro.objects.filter(disponible=True)
     usuario = User.objects.all()
     if request.method == 'POST':
@@ -89,3 +96,14 @@ def lista_multas(request):
 
 def crear_multas(request):
     pass
+
+def registro(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            login(request, usuario)
+            return redirect('index')
+    else:
+        form = UserCreationForm()
+    return render(request, 'gestion/templates/registration/registro.html', {'form': form})

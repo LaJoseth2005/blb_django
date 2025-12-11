@@ -5,16 +5,16 @@
 
 <form method="POST"> 
     {% csrf_token %} 
-    <label for="id_libro" name="libro">Libro: </label>
-    <select type="text" id="id_libro" name="libro" required> <br/>
+    <label for="libro_id" name="libro">Libro: </label>
+    <select type="text" id="libro_id" name="libro" required> <br/>
         <option value="">--Seleccionar Libro--</option>
         {% for libro in libros %}
             <option value="{{libro.id}}">{{libro.titulo}}</option>
         {% endfor %}
     </select>
       
-    <label for="id_usuario" name="usuario">Autor: </label>
-    <select type="text" id="id_usuario" name="usuario" required> <br/>
+    <label for="usuario_id" name="usuario">Usuario: </label>
+    <select type="text" id="usuario_id" name="usuario" required> <br/>
         <option value="">--Seleccionar Usuario--</option>
         {% for usuario in usuarios %}
             <option value="{{usuario.id}}">{{usuario.username}}</option>

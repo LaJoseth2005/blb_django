@@ -29,7 +29,7 @@ class Prestamo(models.Model):
 
     class Meta:
         permissions = (
-            ("Vert_Prestamos", "Puede ver prestamos"),
+            ("Ver_Prestamos", "Puede ver prestamos"),
             ("Gestionar_Prestamos", "Puede gestionar prestamos"),
         )
 

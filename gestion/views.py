@@ -1,9 +1,12 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User, Permission
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponseForbidden
-from django.contrib.auth.models import User
 from django.contrib.auth import login
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.conf import settings
 
@@ -15,7 +18,7 @@ def index(request):
 
 def lista_libros(request):
     libros = Libro.objects.all()
-    return render(request, 'gestion/templates/libros.html', {'libros': libros})
+    return render(request, 'gestion/templates/libros_view.html', {'libros': libros})
 
 def crear_libros(request):
     autores = Autor.objects.all()
@@ -101,9 +104,42 @@ def registro(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            usuario = form.save()
+            usuario = form.save() #Se guarda el usuario para los permisos
+            permiso_user = Permission.objects.get(codename = 'Gestionar_Prestamos') #codename es de donde se tiene el permiso, si no esta lanzaria error
+            usuario.user_permissions.add(permiso_user) #aqui se llama al usuario y los permisos que se le asigna
             login(request, usuario)
-            return redirect('index')
+            return redirect('index') #manda al usuario al index cuando ya se registra
     else:
         form = UserCreationForm()
     return render(request, 'gestion/templates/registration/registro.html', {'form': form})
+
+class LibroListView(LoginRequiredMixin, ListView):
+    model = Libro
+    template = 'gestion/templates/libro_list.html'
+    context_object_name = 'libros'
+    paginate_by = 3
+
+class LibroDetalleView(LoginRequiredMixin, DetailView):
+    model = Libro
+    template = 'gestion/templates/detalle_libros.html'
+    context_object_name = 'libro'
+
+class LibroCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Libro
+    fields = ['titulo', 'autor', 'disponible']
+    template_name =  'gestion/templates/crear_libros.html'
+    success_url = reverse_lazy('libro_list')
+    pemission_required = 'gestion.add_libro'
+
+class LibroUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Libro
+    fields = ['titulo', 'autor']
+    template_name =  'gestion/templates/editar_libros.html'
+    success_url = reverse_lazy('libro_list')
+    pemission_required = 'gestion.change_libro'
+
+class LibroUpdateView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Libro
+    template_name = 'gestion/templates/delete_libros.html'
+    success_url = reverse_lazy('libro_list')
+    pemission_required = 'gestion.delete_libro'

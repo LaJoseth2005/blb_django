@@ -11,10 +11,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_ROOT= os.path.join(BASE_DIR,'static')
+MEDIA_ROOT= os.path.join(BASE_DIR,'media')
 TITLE = "UTE 2 semestre desarrollo de software"
 
 MULTA = 0.5
@@ -31,7 +36,7 @@ DEBUG = True
 
 #Aqui permite a paginas usar la nuestra, si no entra aqui no esta permitido
 #Lo mejor es permitir a local host
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost','124.0.0.1','www.biblioteca2s.com', 'biblioteca2s.com']
 
 
 # Application definition

@@ -41,12 +41,14 @@ class Prestamo(models.Model):
         hoy = timezone.now().date #capturando la fecha actual
         fecha_ref = self.fecha_devolucion or hoy
         if fecha_ref > self.fecha_max:
-            return(fecha_ref + self.fecha_devolucion).days
+            return(fecha_ref - self.fecha_devolucion).days
+        else:
+            return 0
         
     @property
     def multa_retraso(self):
         tarifa = 0.50
-        return self.dias_retraso * tarifa
+        return (self.dias_retraso * tarifa)
     
 class Multa(models.Model):
     prestamo = models.ForeignKey(Prestamo, related_name="multas", on_delete=models.PROTECT)

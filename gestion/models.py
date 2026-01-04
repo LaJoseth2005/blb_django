@@ -8,6 +8,7 @@ class Autor(models.Model):
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     bibliografia = models.CharField(max_length=200, blank=True, null=True)
+    image= models.ImageField(upload_to='libros/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
@@ -16,6 +17,7 @@ class Libro(models.Model):
     titulo = models.CharField(max_length=20)
     autor = models.ForeignKey(Autor, related_name="libro", on_delete=models.PROTECT)
     disponible = models.BooleanField(default=True)
+    image= models.ImageField(upload_to='libros/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.titulo} {self.autor}"

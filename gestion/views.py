@@ -49,9 +49,10 @@ def crear_autores(request, id=None):
         nombre = request.POST.get('nombre')
         apellido = request.POST.get('apellido')
         bibliografia = request.POST.get('bibliografia')
+        imagen= request.FILES.get('imagen')
 
         if autor == None:
-            Autor.objects.create(nombre=nombre, apellido=apellido, bibliografia=bibliografia)
+            Autor.objects.create(nombre=nombre, apellido=apellido, bibliografia=bibliografia, imagen=imagen)
         else:
             autor.apellido = apellido
             autor.nombre = nombre
@@ -82,7 +83,8 @@ def crear_prestamo(request):
             usuario = get_object_or_404(User, id=usuario_id)
             prestamo = Prestamo.objects.create(libro = libro,
                                                usuario = usuario,
-                                               fecha_prestamo = fecha_prestamo)
+                                               fecha_prestamo = fecha_prestamo,
+                                               fecha_max = fecha_max)
             libro.disponible = False
             libro.save()
             return redirect('detalle_prestamo', id=prestamo.id)

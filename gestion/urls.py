@@ -34,9 +34,10 @@ urlpatterns = [
     path("prestamos/", views.lista_prestamo, name="lista_prestamos"),
     path("prestamos/nuevo/", views.crear_prestamo, name="crear_prestamo"),
     path("prestamos/<int:id>", views.detalle_prestamo, name="detalle_prestamo"),
+    path("prestamos/<int:id>/devolver/", views.devolver_prestamo, name="devolver_prestamo"),
 
     # Multas
     path("multas/", views.lista_multas, name="lista_multas"),
-    path("multas/nuevo/", views.crear_multas, name="crear_multas"),
-    #path("multas/nuevo/<int:prestamo_id>", views.crear_multas, name="crear_multas"),
+    path("multas/nuevo/", views.crear_multas, name="crear_multas_sin_id"),
+    path("multas/nuevo/<int:prestamo_id>", views.crear_multas, name="crear_multas"),
 ]

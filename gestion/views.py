@@ -64,10 +64,22 @@ def crear_autores(request, id=None):
                'texto_boton': 'Guardar cambios' if modo == 'editar' else 'Crear'}
     return render(request, 'crear_autores.html', context)
 
+@login_required
 def lista_prestamo(request):
-    prestamo = Prestamo.objects.all()
-    return render(request, 'prestamo.html', {'prestamo': prestamo})
+    prestamos = Prestamo.objects.filter(
+        fecha_devolucion__isnull=True,
+        tiene_multa=False
+    )
+    return render(request, "prestamo.html", {"prestamos": prestamos})
 
+@login_required
+def devolver_prestamo(request, id):
+    prestamo = get_object_or_404(Prestamo, id=id)
+    prestamo.libro.disponible = True
+    prestamo.libro.save()
+    prestamo.fecha_devolucion = timezone.now().date()
+    prestamo.save()
+    return redirect("lista_prestamos")
 
 def importar_libro(request):
     autores = Autor.objects.all()
@@ -110,47 +122,98 @@ def importar_libro(request):
 def crear_prestamo(request):
     if not request.user.has_perm('gestion.gestionar_prestamos'):
         return HttpResponseForbidden()
-    libro = Libro.objects.filter(disponible=True)
-    usuario = User.objects.all()
+    
+    libros = Libro.objects.filter(disponible=True)
+    usuarios = User.objects.all()
+    
     if request.method == 'POST':
-        libro_id = request.method.POST.get('libro')
-        usuario_id = request.method.POST.get('usuario')
-        fecha_prestamo = request.method.POST.get('fecha_prestamo')
+        libro_id = request.POST.get('libro')
+        usuario_id = request.POST.get('usuario')
+        fecha_prestamo = request.POST.get('fecha_prestamo')
         fecha_max = timezone.now().date() + timezone.timedelta(days=7)
 
         if libro_id and usuario_id and fecha_prestamo:
             libro = get_object_or_404(Libro, id=libro_id)
             usuario = get_object_or_404(User, id=usuario_id)
-            prestamo = Prestamo.objects.create(libro = libro,
-                                               usuario = usuario,
-                                               fecha_prestamo = fecha_prestamo,
-                                               fecha_max = fecha_max)
+            prestamo = Prestamo.objects.create(
+                libro=libro,
+                usuario=usuario,
+                fecha_prestamo=fecha_prestamo,
+                fecha_max=fecha_max
+            )
             libro.disponible = False
             libro.save()
             return redirect('detalle_prestamo', id=prestamo.id)
-    fecha = (timezone.now().date()).isoformat() #YYYY-MM-DD
-    return render(request, 'crear_prestamo.html', {'libros':libro,
-                                                                     'usuario': usuario,
-                                                                     'fecha': fecha})
-def detalle_prestamo(request):
-    pass
+    
+    fecha = timezone.now().date().isoformat()  # YYYY-MM-DD
+    return render(request, 'crear_prestamo.html', {
+        'libros': libros,
+        'usuario': usuarios,
+        'fecha': fecha
+    })
+
+def detalle_prestamo(request, id):
+    prestamo = get_object_or_404(Prestamo, id=id)
+    return render(request, 'detalle_prestamo.html', {'prestamo': prestamo})
 
 def lista_multas(request):
     multas = Multa.objects.all()
     return render(request, 'multas.html', {'multas': multas})
 
-def crear_multas(request):
-    pass
+@login_required
+def crear_multas(request, prestamo_id=None):
+    if prestamo_id is None:
+        prestamos = Prestamo.objects.filter(fecha_devolucion__isnull=True, tiene_multa=False)
+        fecha = timezone.now().date()
+        return render(request, "crear_multas.html", {
+            "prestamos": prestamos,
+            "prestamo_seleccionado": None,
+            "fecha": fecha
+        })
+
+    prestamo = get_object_or_404(Prestamo, id=prestamo_id)
+    hoy = timezone.now().date()
+
+    if request.method == "POST":
+        tipo = request.POST.get("tipo")
+        monto = request.POST.get("monto")
+        fecha = request.POST.get("fecha")
+        pagada = True if request.POST.get("pagada") else False
+
+        Multa.objects.create(
+            prestamo=prestamo,
+            tipo=tipo,
+            monto=monto,
+            fecha=fecha,
+            pagada=pagada
+        )
+
+        # marcar el préstamo como multado para que no aparezca en pendientes
+        prestamo.tiene_multa = True
+        prestamo.save()
+
+        return redirect("lista_multas")
+
+    return render(request, "crear_multas.html", {
+        "prestamos": Prestamo.objects.all(),
+        "prestamo_seleccionado": prestamo,
+        "fecha": hoy
+    })
 
 def registro(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            usuario = form.save() #Se guarda el usuario para los permisos
-            permiso_user = Permission.objects.get(codename = 'Gestionar_Prestamos') #codename es de donde se tiene el permiso, si no esta lanzaria error
-            usuario.user_permissions.add(permiso_user) #aqui se llama al usuario y los permisos que se le asigna
+            usuario = form.save()
+    
+            try:
+                permiso = Permission.objects.get(codename='gestionar_prestamos')
+                usuario.user_permissions.add(permiso)
+            except Permission.DoesNotExist:
+                print("⚠️ ADVERTENCIA: El permiso 'gestionar_prestamos' no existe en la BD. Recuerda hacer migrate.")
+
             login(request, usuario)
-            return redirect('index') #manda al usuario al index cuando ya se registra
+            return redirect('index')
     else:
         form = UserCreationForm()
     return render(request, 'registration/registro.html', {'form': form})

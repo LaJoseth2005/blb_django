@@ -9,16 +9,17 @@ from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.conf import settings
+from .openlibrary import obtener_datos_por_isbn
 
 from .models import Autor, Libro, Prestamo, Multa
 
 def index(request):
     title = settings.TITLE
-    return render(request, 'gestion/templates/home.html', {'titulo': title})
+    return render(request, 'home.html', {'titulo': title})
 
 def lista_libros(request):
     libros = Libro.objects.all()
-    return render(request, 'gestion/templates/libros_view.html', {'libros': libros})
+    return render(request, 'libros_view.html', {'libros': libros})
 
 def crear_libros(request):
     autores = Autor.objects.all()
@@ -30,11 +31,11 @@ def crear_libros(request):
             autor = get_object_or_404(Autor, id=autor_id)
             Libro.objects.create(titulo=titulo, autor=autor)
             return redirect('lista_libros')
-    return render(request, 'gestion/templates/crear_libros.html', {'autores': autores})  
+    return render(request, 'crear_libros.html', {'autores': autores})  
 
 def lista_autores(request):
     autores = Autor.objects.all()
-    return render(request, 'gestion/templates/autores.html', {'autores': autores})
+    return render(request, 'autores.html', {'autores': autores})
 
 @login_required
 def crear_autores(request, id=None):
@@ -49,10 +50,9 @@ def crear_autores(request, id=None):
         nombre = request.POST.get('nombre')
         apellido = request.POST.get('apellido')
         bibliografia = request.POST.get('bibliografia')
-        imagen= request.FILES.get('imagen')
 
         if autor == None:
-            Autor.objects.create(nombre=nombre, apellido=apellido, bibliografia=bibliografia, imagen=imagen)
+            Autor.objects.create(nombre=nombre, apellido=apellido, bibliografia=bibliografia)
         else:
             autor.apellido = apellido
             autor.nombre = nombre
@@ -62,11 +62,49 @@ def crear_autores(request, id=None):
     context = {'autor': autor,
                'titulo': 'Editar Autor' if modo == 'editar' else 'Crear Autor',
                'texto_boton': 'Guardar cambios' if modo == 'editar' else 'Crear'}
-    return render(request, 'gestion/templates/crear_autores.html', context)
+    return render(request, 'crear_autores.html', context)
 
 def lista_prestamo(request):
     prestamo = Prestamo.objects.all()
-    return render(request, 'gestion/templates/prestamo.html', {'prestamo': prestamo})
+    return render(request, 'prestamo.html', {'prestamo': prestamo})
+
+
+def importar_libro(request):
+    autores = Autor.objects.all()
+    mensaje = None
+
+    if request.method == "POST":
+        isbn_input = request.POST.get("isbn")
+        if isbn_input:
+            datos = obtener_datos_por_isbn(isbn_input) 
+            
+            if datos:
+                isbn_api = datos["isbn"]
+                if Libro.objects.filter(isbn=isbn_api).exists():
+                    mensaje = f"El libro '{datos['titulo']}' (ISBN: {isbn_api}) ya está registrado."
+                else:
+                    autor_info = datos["autor"]
+                    autor, _ = Autor.objects.get_or_create(
+                        nombre=autor_info["nombre"],
+                        apellido=autor_info["apellido"],
+                        defaults={"bibliografia": autor_info.get("bibliografia", "")}
+                    )
+                    Libro.objects.create(
+                        titulo=datos["titulo"],
+                        fecha=datos["fecha"],
+                        isbn=isbn_api,
+                        editorial=datos["editorial"],
+                        autor=autor,
+                        disponible=True
+                    )
+                    return redirect("lista_libros")
+            else:
+                mensaje = "No se pudo obtener datos del ISBN o no existe en OpenLibrary."
+
+    return render(request, "crear_libros.html", {
+        "autores": autores, 
+        "mensaje": mensaje
+    })
 
 @login_required
 def crear_prestamo(request):
@@ -78,6 +116,8 @@ def crear_prestamo(request):
         libro_id = request.method.POST.get('libro')
         usuario_id = request.method.POST.get('usuario')
         fecha_prestamo = request.method.POST.get('fecha_prestamo')
+        fecha_max = timezone.now().date() + timezone.timedelta(days=7)
+
         if libro_id and usuario_id and fecha_prestamo:
             libro = get_object_or_404(Libro, id=libro_id)
             usuario = get_object_or_404(User, id=usuario_id)
@@ -89,7 +129,7 @@ def crear_prestamo(request):
             libro.save()
             return redirect('detalle_prestamo', id=prestamo.id)
     fecha = (timezone.now().date()).isoformat() #YYYY-MM-DD
-    return render(request, 'gestion/templates/crear_prestamo.html', {'libros':libro,
+    return render(request, 'crear_prestamo.html', {'libros':libro,
                                                                      'usuario': usuario,
                                                                      'fecha': fecha})
 def detalle_prestamo(request):
@@ -97,7 +137,7 @@ def detalle_prestamo(request):
 
 def lista_multas(request):
     multas = Multa.objects.all()
-    return render(request, 'gestion/templates/multas.html', {'multas': multas})
+    return render(request, 'multas.html', {'multas': multas})
 
 def crear_multas(request):
     pass
@@ -113,7 +153,7 @@ def registro(request):
             return redirect('index') #manda al usuario al index cuando ya se registra
     else:
         form = UserCreationForm()
-    return render(request, 'gestion/templates/registration/registro.html', {'form': form})
+    return render(request, 'registration/registro.html', {'form': form})
 
 class LibroListView(LoginRequiredMixin, ListView):
     model = Libro

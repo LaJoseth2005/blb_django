@@ -36,7 +36,7 @@ DEBUG = True
 
 #Aqui permite a paginas usar la nuestra, si no entra aqui no esta permitido
 #Lo mejor es permitir a local host
-ALLOWED_HOSTS = ['localhost','124.0.0.1','www.biblioteca2s.com', 'biblioteca2s.com']
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -66,7 +66,7 @@ ROOT_URLCONF = 'blb_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR],
+        'DIRS': [BASE_DIR/ "static",],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

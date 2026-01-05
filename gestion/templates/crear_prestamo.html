@@ -1,28 +1,80 @@
 {% extends "index.html" %}
 
-{%block contenido%}
-<h2> Crear Prestamos </h2>
+{% block titulo_pagina %}Nuevo Préstamo{% endblock %}
 
-<form method="POST"> 
-    {% csrf_token %} 
-    <label for="libro_id" name="libro">Libro: </label>
-    <select type="text" id="libro_id" name="libro" required> <br/>
-        <option value="">--Seleccionar Libro--</option>
-        {% for libro in libros %}
-            <option value="{{libro.id}}">{{libro.titulo}}</option>
-        {% endfor %}
-    </select>
-      
-    <label for="usuario_id" name="usuario">Usuario: </label>
-    <select type="text" id="usuario_id" name="usuario" required> <br/>
-        <option value="">--Seleccionar Usuario--</option>
-        {% for usuario in usuarios %}
-            <option value="{{usuario.id}}">{{usuario.username}}</option>
-        {% endfor %}
+{% block contenido %}
 
-    <label for="id_fecha_prestamo" name="fecha_prestamo">Fecha Prestamo: </label>
-    <input type="date" id="id_fecha_prestamo" name="fecha_prestamo" value= "{{ fecha }} "required> <br/>
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        
+        <div class="card border-0 shadow-sm">
+            
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-3 me-3 text-primary">
+                        <i class="bi bi-journal-arrow-up fs-3" style="color: var(--brand-color);"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold text-dark">Registrar Préstamo</h5>
+                        <small class="text-muted">Asignar un libro a un usuario.</small>
+                    </div>
+                </div>
+            </div>
 
-    <button type="submit">Crear </button>
-</form>
+            <div class="card-body p-4">
+                
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="libro_id" class="form-label fw-medium text-secondary">Libro Disponible</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-book"></i></span>
+                            <select class="form-select form-select-lg border-start-0 ps-0" id="libro_id" name="libro" required>
+                                <option value="" selected disabled>-- Seleccionar Libro --</option>
+                                {% for libro in libros %}
+                                    <option value="{{libro.id}}">{{libro.titulo}} ({{ libro.autor.nombre }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="usuario_id" class="form-label fw-medium text-secondary">Usuario Solicitante</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person"></i></span>
+                            <select class="form-select form-select-lg border-start-0 ps-0" id="usuario_id" name="usuario" required>
+                                <option value="" selected disabled>-- Seleccionar Usuario --</option>
+                                {% for usuario in usuarios %}
+                                    <option value="{{usuario.id}}">{{usuario.username}}</option>
+                                {% endfor %}
+                            </select> </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_fecha_prestamo" class="form-label fw-medium text-secondary">Fecha de Inicio</label>
+                        <input type="date" class="form-control form-control-lg" id="id_fecha_prestamo" name="fecha_prestamo" 
+                               value="{{ fecha }}" required>
+                        <div class="form-text text-muted small">
+                            <i class="bi bi-info-circle me-1"></i> La devolución se calcula automáticamente a 15 días.
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm border-0"
+                                style="background-color: var(--brand-color);">
+                            <i class="bi bi-check-circle-fill me-2"></i> Crear Préstamo
+                        </button>
+                        
+                        <a href="{% url 'lista_prestamos' %}" class="btn btn-link text-muted text-decoration-none text-center">
+                            Cancelar operación
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

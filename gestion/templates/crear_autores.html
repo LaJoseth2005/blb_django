@@ -1,19 +1,72 @@
 {% extends "index.html" %}
 
+{% block titulo_pagina %}Gestión de Autores{% endblock %}
+
 {% block contenido %}
-<h2> Crear Autor </h2>
 
-<form method="POST">
-    {% csrf_token %}
-    <label for="id_nombre" name="nombre">Nombre: </label>
-    <input type="text" id="id_nombre" name="nombre" value="{{ autor.nombre | default_if_none:'' }}" required><br/>
-    
-   <label for="id_apellido" name="apellido">Apellido: </label> 
-   <input type="text" id="id_apellido" name="apellido" value="{{ autor.apellido | default_if_none:'' }}" required><br/>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        
+        <div class="card border-0 shadow-sm">
+            
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-3 me-3 text-success">
+                        <i class="bi bi-person-lines-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold text-dark">
+                            {% if texto_boton == 'Guardar cambios' %}Editar Autor{% else %}Registrar Nuevo Autor{% endif %}
+                        </h5>
+                        <small class="text-muted">Información personal y biográfica del escritor.</small>
+                    </div>
+                </div>
+            </div>
 
-   <label for="id_bibliografia" name="bibliografia">Bibliografia: </label> 
-   <input type="text" id="id_bibliografia" name="bibliografia" value="{{ autor.bibliografia | default_if_none:'' }}" required><br/>
+            <div class="card-body p-4">
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-   <button type="submit"> {{ texto_boton }}</button>
-</form>
+                    <div class="row g-3">
+                        
+                        <div class="col-md-6">
+                            <label for="id_nombre" class="form-label fw-medium text-secondary">Nombre</label>
+                            <input type="text" class="form-control form-control-lg" id="id_nombre" name="nombre" 
+                                   value="{{ autor.nombre|default_if_none:'' }}" 
+                                   placeholder="Ej: Gabriel" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="id_apellido" class="form-label fw-medium text-secondary">Apellido</label>
+                            <input type="text" class="form-control form-control-lg" id="id_apellido" name="apellido" 
+                                   value="{{ autor.apellido|default_if_none:'' }}" 
+                                   placeholder="Ej: García Márquez" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="id_bibliografia" class="form-label fw-medium text-secondary">Bibliografía / Perfil</label>
+                            <textarea class="form-control" id="id_bibliografia" name="bibliografia" rows="4" 
+                                      placeholder="Escribe una breve reseña del autor...">{{ autor.bibliografia|default_if_none:'' }}</textarea>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{% url 'lista_autores' %}" class="btn btn-light border">
+                            Cancelar
+                        </a>
+
+                        <button type="submit" class="btn text-white px-4 shadow-sm" 
+                                style="background-color: var(--brand-color);">
+                            <i class="bi bi-check-lg me-2"></i> {{ texto_boton }}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -1,28 +1,67 @@
 {% extends "index.html" %}
 
+{% block titulo_pagina %}Gestión de Autores{% endblock %}
+
 {% block contenido %}
-<h2> AUTORES </h2>
-<table style="border: 1px solid">
-    <tr style="border: 1px solid">
-        <td style="border: 1px solid">Nombre</td>
-        <td style="border: 1px solid">Apellido</td>
-        <td style="border: 1px solid">Bibliografía</td>
-    </tr>
-    {% for autor in autores %}
-    <tr style="border: 1px solid">
-        <td style="border: 1px solid">
-            {{ autor.nombre }}
-        </td>
-        <td style="border: 1px solid">
-            {{ autor.apellido }}
-        </td>
-        <td style="border: 1px solid">
-            {{ autor.bibliografia}}
-        </td>
-        <td>
-            <a href="{% url 'editar_autor' autor.id%}">Editar</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">Listado completo de escritores registrados</p>
+    
+    <a href="{% url 'crear_autores' %}" class="btn text-white rounded-pill px-4 shadow-sm" 
+       style="background-color: var(--brand-color);">
+        <i class="bi bi-plus-lg me-1"></i> Nuevo Autor
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle border-light">
+        <thead class="table-light text-secondary">
+            <tr>
+                <th scope="col" class="ps-3">Autor</th>
+                <th scope="col">Bibliografía</th>
+                <th scope="col" class="text-end pe-3">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for autor in autores %}
+            <tr>
+                <td class="ps-3">
+                    <div class="d-flex align-items-center">
+
+                        <div>
+                            <h6 class="mb-0 fw-bold text-dark">{{ autor.nombre }} {{ autor.apellido }}</h6>
+                            <small class="text-muted">ID: {{ autor.id }}</small>
+                        </div>
+                    </div>
+                </td>
+
+                <td style="max-width: 300px;">
+                    <small class="text-muted">
+                        {{ autor.bibliografia|default:"Sin biografía registrada"|truncatechars:80 }}
+                    </small>
+                </td>
+
+                <td class="text-end pe-3">
+                    <a href="{% url 'editar_autor' autor.id %}" 
+                       class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1" 
+                       title="Editar">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
+                    
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center py-5">
+                    <div class="text-muted">
+                        <i class="bi bi-folder-x display-4 d-block mb-3"></i>
+                        No hay autores registrados todavía.
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 {% endblock %}

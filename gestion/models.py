@@ -27,7 +27,7 @@ class Prestamo(models.Model):
     libro = models.ForeignKey(Libro, related_name="prestamos", on_delete=models.PROTECT)
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="prestamos", on_delete=models.PROTECT)
     fecha_prestamo = models.DateField(default=timezone.now)
-    fecha_max = models.DateField()
+    fecha_max = models.DateField(default=timezone.now)
     fecha_devolucion = models.DateField(blank=True, null=True) #me permita crear con datos en blanco o null
 
     class Meta:
@@ -53,6 +53,16 @@ class Prestamo(models.Model):
         tarifa = 0.50
         return (self.dias_retraso * tarifa)
     
+    @property
+    def multa_perdida(self):
+        tarifa = 2.00
+        return (self.dias_retraso * tarifa)
+    
+    @property
+    def multa_deterioro(self):
+        tarifa = 4.00
+        return (self.dias_retraso * tarifa)
+
 class Multa(models.Model):
     prestamo = models.ForeignKey(Prestamo, related_name="multas", on_delete=models.PROTECT)
     tipo = models.CharField(max_length=10, choices=(('r', 'retraso'),('p', 'perdida'),('d', 'deterioro')))
@@ -67,4 +77,8 @@ class Multa(models.Model):
     def save(self, *args, **kwargs):
         if self.tipo == 'r' and self.monto == 0:
             self.monto = self.prestamo.multa_retraso
+        elif self.tipo == 'p' and self.monto == 0:
+            self.monto = self.prestamo.multa_perdida
+        elif self.tipo == 'd' and self.monto == 0:
+            self.monto = self.prestamo.multa_deterioro
         super().save(*args **kwargs)

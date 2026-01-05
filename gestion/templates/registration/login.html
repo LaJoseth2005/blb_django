@@ -1,26 +1,66 @@
 {% extends "index.html" %}
 
+{% block titulo_pagina %}Iniciar Sesión{% endblock %}
+
 {% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        
+        <div class="card border-0 shadow-sm">
+            
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-3 me-3" style="color:#e65b5b;">
+                        <i class="bi bi-person-circle fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold" style="color:#e65b5b;">Bienvenido</h5>
+                        <small class="text-muted">Accede con tu usuario y contraseña</small>
+                    </div>
+                </div>
+            </div>
 
-<h2> Iniciar Sesión </h2>
+            <div class="card-body px-4 pb-4">
+                {% if form.errors %}
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>Usuario o contraseña incorrectos</div>
+                </div>
+                {% endif %}
 
-{% if form.errors %}
-<p>Usuario o contraseña incorrectos</p>
+                <form method="POST" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label fw-semibold" style="color:#e65b5b;">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" id="id_username" class="form-control" required>
+                        </div>
+                    </div>
 
-{% endif %}
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label fw-semibold" style="color:#e65b5b;">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="password" id="id_password" class="form-control" required>
+                        </div>
+                    </div>
 
-<form method='POST'>
-    {% csrf_token %}
-    <label for="id_username">Usuario: </label>
-    <input type="text" name="username" id="id_username" required/><br/>
+                    <div class="d-grid">
+                        <button type="submit" class="btn fw-bold text-white" style="background-color:#e65b5b;">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                        </button>
+                    </div>
 
-    <label for="id_password">contraseña: </label>
-    <input type="password" name="password" id="id_password" required/><br/>
-
-    <button type="submit">Entrar</button>
-    <td>
-        <a href="{% url 'registro' %}">Registrar</a>
-    </td>
-</form>
-
+                    <div class="text-center mt-3">
+                        <a href="{% url 'registro' %}" class="btn fw-bold text-white" style="background-color:#e65b5b;">
+                            <i class="bi bi-person-plus"></i> Registrar nuevo usuario
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

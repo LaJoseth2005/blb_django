@@ -33,9 +33,9 @@
                         <div class="input-group">
                             <input type="text" class="form-control" id="isbn" name="isbn" placeholder="Ingresa el ISBN o Título del libro...">
                             <button class="btn btn-outline-secondary" type="submit" 
-                                    formaction="{% url 'importar_libro' %}" 
-                                    formmethod="POST">
-                                <i class="bi bi-cloud-download me-2"></i>Buscar en OpenLibrary
+                                formaction="{% url 'importar_libro' %}" 
+                                formmethod="POST"
+                                formnovalidate> <i class="bi bi-cloud-download me-2"></i>Buscar en OpenLibrary
                             </button>
                         </div>
                         <div class="form-text text-muted small mt-1">

@@ -1,100 +1,103 @@
 {% extends "index.html" %}
 
-{% block titulo_pagina %}Registro de Nuevo Libro{% endblock %}
+{% block titulo_pagina %}Nuevo Libro{% endblock %}
 
 {% block contenido %}
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        
-        <div class="card border-0 shadow-sm">
-            
-            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-                <div class="d-flex align-items-center">
-                    <div class="rounded-circle bg-light p-3 me-3 text-primary">
-                        <i class="bi bi-book fs-3" style="color: var(--brand-color);"></i>
-                    </div>
-                    <div>
-                        <h5 class="mb-0 fw-bold text-dark">Datos del Libro</h5>
-                        <small class="text-muted">Complete la información manual o importe desde la web.</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-body p-4">
-                
-                <form method="POST">
-                    {% csrf_token %}
-
-                    <div class="p-3 mb-4 rounded bg-light border border-dashed">
-                        <label for="isbn" class="form-label fw-bold text-secondary small">
-                            <i class="bi bi-magic me-1"></i> OPCIÓN RÁPIDA: IMPORTAR
-                        </label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="isbn" name="isbn" placeholder="Ingresa el ISBN o Título del libro...">
-                            <button class="btn btn-outline-secondary" type="submit" 
-                                formaction="{% url 'importar_libro' %}" 
-                                formmethod="POST"
-                                formnovalidate> <i class="bi bi-cloud-download me-2"></i>Buscar en OpenLibrary
-                            </button>
-                        </div>
-                        <div class="form-text text-muted small mt-1">
-                            Esto intentará llenar el título y la portada automáticamente.
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-4">
-                        <hr class="flex-grow-1">
-                        <span class="px-3 text-muted small">O LLENA MANUALMENTE</span>
-                        <hr class="flex-grow-1">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="id_titulo" class="form-label fw-medium text-secondary">Título del Libro</label>
-                        <input type="text" class="form-control form-control-lg" id="id_titulo" name="titulo" placeholder="Ej: Cien años de soledad" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="id_autor" class="form-label fw-medium text-secondary">Autor Principal</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-                            <select class="form-select form-select-lg" id="id_autor" name="autor" required>
-                                <option value="" selected disabled>-- Seleccione un autor --</option>
-                                {% for autor in autores %}
-                                    <option value="{{ autor.id }}">{{ autor.nombre }} {{ autor.apellido }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="text-end mt-1">
-                            <a href="{% url 'crear_autores' %}" class="text-decoration-none small" style="color: var(--brand-color);">
-                                + ¿No está en la lista? Crear Autor
-                            </a>
-                        </div>
-                    </div>
-
-                    {% if mensaje %}
-                        <div class="alert alert-warning d-flex align-items-center" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <div>{{ mensaje }}</div>
-                        </div>
-                    {% endif %}
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" name="accion" value="manual" 
-                                class="btn btn-primary btn-lg rounded-pill shadow-sm border-0"
-                                style="background-color: var(--brand-color);">
-                            <i class="bi bi-save me-2"></i> Guardar Libro Manualmente
-                        </button>
-                        
-                        <a href="{% url 'lista_libros' %}" class="btn btn-link text-muted text-decoration-none">
-                            Cancelar y volver
-                        </a>
-                    </div>
-
-                </form>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">Agrega un nuevo libro al inventario</p>
+    
+    <div>
+        <a href="{% url 'lista_libros' %}" class="btn btn-link text-muted text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Volver al catálogo
+        </a>
     </div>
 </div>
+
+<form method="POST" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="fw-bold text-secondary mb-3">
+                <i class="bi bi-magic me-1"></i> Opción rápida: importar desde OpenLibrary
+            </h6>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label for="isbn" class="form-label text-muted small">ISBN o título</label>
+                    <input type="text" class="form-control" id="isbn" name="isbn" placeholder="Ej: 9780140449266">
+                </div>
+                <div class="col-md-6">
+                    <label for="stock_openlibrary" class="form-label fw-medium text-secondary">Stock disponible</label>
+                    <input type="number" class="form-control" id="stock_openlibrary" name="stock_openlibrary" required min="1" placeholder="Ej: 5">
+                </div>
+            </div>
+            <div class="text-end mt-3">
+                <button class="btn btn-outline-secondary rounded-pill px-4 shadow-sm" type="submit"
+                        formaction="{% url 'importar_libro' %}" formmethod="POST" formnovalidate>
+                    <i class="bi bi-cloud-download me-2"></i> Buscar en OpenLibrary
+                </button>
+            </div>
+            <small class="text-muted d-block mt-2">
+                Esto intentará llenar el título y la portada automáticamente.
+            </small>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center mb-4">
+        <hr class="flex-grow-1">
+        <span class="px-3 text-muted small">O llena manualmente</span>
+        <hr class="flex-grow-1">
+    </div>
+
+    <div class="mb-3">
+        <label for="id_titulo" class="form-label fw-medium text-secondary">Título del Libro</label>
+        <input type="text" class="form-control form-control-lg" id="id_titulo" name="titulo" placeholder="Ej: Cien años de soledad" required>
+    </div>
+
+    <div class="mb-4">
+        <label for="id_autor" class="form-label fw-medium text-secondary">Autor Principal</label>
+        <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+            <select class="form-select form-select-lg" id="id_autor" name="autor" required>
+                <option value="" selected disabled>-- Seleccione un autor --</option>
+                {% for autor in autores %}
+                    <option value="{{ autor.id }}">{{ autor.nombre }} {{ autor.apellido }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="text-end mt-1">
+            <a href="{% url 'crear_autores' %}" class="text-decoration-none small" style="color: var(--brand-color);">
+                + ¿No está en la lista? Crear Autor
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label for="anio" class="form-label fw-medium text-secondary">Año de publicación</label>
+            <input type="number" class="form-control" id="anio" name="anio" placeholder="Ej: 2005">
+        </div>
+        <div class="col-md-6">
+            <label for="stock_manual" class="form-label fw-medium text-secondary">Stock disponible</label>
+            <input type="number" class="form-control" id="stock_manual" name="stock_manual" required min="1" placeholder="Ej: 5">
+        </div>
+    </div>
+
+    {% if mensaje %}
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>{{ mensaje }}</div>
+        </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+        <button type="submit" name="accion" value="manual"
+                class="btn btn-primary btn-lg rounded-pill shadow-sm border-0"
+                style="background-color: var(--brand-color);">
+            <i class="bi bi-save me-2"></i> Guardar Libro Manualmente
+        </button>
+    </div>
+</form>
 
 {% endblock %}

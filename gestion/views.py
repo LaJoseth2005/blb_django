@@ -10,32 +10,50 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.conf import settings
 from .openlibrary import obtener_datos_por_isbn
+from django.contrib.auth import get_user_model
+
 
 from .models import Autor, Libro, Prestamo, Multa
+
 
 def index(request):
     title = settings.TITLE
     return render(request, 'home.html', {'titulo': title})
 
+
 def lista_libros(request):
     libros = Libro.objects.all()
     return render(request, 'libros_view.html', {'libros': libros})
 
+
 def crear_libros(request):
     autores = Autor.objects.all()
     if request.method == "POST":
-        titulo =  request.POST.get('titulo')
-        autor_id =  request.POST.get('autor')
-        
-        if titulo and autor_id:
+        titulo = request.POST.get('titulo')
+        autor_id = request.POST.get('autor')
+        anio = request.POST.get('anio')
+        stock_manual = request.POST.get("stock_manual")
+
+        if titulo and autor_id and stock_manual:
             autor = get_object_or_404(Autor, id=autor_id)
-            Libro.objects.create(titulo=titulo, autor=autor)
+            Libro.objects.create(
+                titulo=titulo,
+                autor=autor,
+                anio=anio if anio else None,
+                stock=int(stock_manual),
+                disponible=True
+            )
             return redirect('lista_libros')
-    return render(request, 'crear_libros.html', {'autores': autores})  
+
+    return render(request, 'crear_libros.html', {
+        'autores': autores
+    })
+
 
 def lista_autores(request):
     autores = Autor.objects.all()
     return render(request, 'autores.html', {'autores': autores})
+
 
 @login_required
 def crear_autores(request, id=None):
@@ -64,22 +82,24 @@ def crear_autores(request, id=None):
                'texto_boton': 'Guardar cambios' if modo == 'editar' else 'Crear'}
     return render(request, 'crear_autores.html', context)
 
+
 @login_required
-def lista_prestamo(request):
+def lista_prestamos(request):
     prestamos = Prestamo.objects.filter(
         fecha_devolucion__isnull=True,
         tiene_multa=False
     )
     return render(request, "prestamo.html", {"prestamos": prestamos})
 
+
 @login_required
 def devolver_prestamo(request, id):
     prestamo = get_object_or_404(Prestamo, id=id)
-    prestamo.libro.disponible = True
-    prestamo.libro.save()
+    prestamo.libro.aumentar_stock()
     prestamo.fecha_devolucion = timezone.now().date()
     prestamo.save()
     return redirect("lista_prestamos")
+
 
 def importar_libro(request):
     autores = Autor.objects.all()
@@ -87,11 +107,14 @@ def importar_libro(request):
 
     if request.method == "POST":
         isbn_input = request.POST.get("isbn")
-        if isbn_input:
-            datos = obtener_datos_por_isbn(isbn_input) 
-            
+        stock_openlibrary = request.POST.get("stock_openlibrary")
+
+        if isbn_input and stock_openlibrary:
+            datos = obtener_datos_por_isbn(isbn_input)
+
             if datos:
                 isbn_api = datos["isbn"]
+
                 if Libro.objects.filter(isbn=isbn_api).exists():
                     mensaje = f"El libro '{datos['titulo']}' (ISBN: {isbn_api}) ya está registrado."
                 else:
@@ -101,29 +124,32 @@ def importar_libro(request):
                         apellido=autor_info["apellido"],
                         defaults={"bibliografia": autor_info.get("bibliografia", "")}
                     )
+
                     Libro.objects.create(
                         titulo=datos["titulo"],
-                        fecha=datos["fecha"],
+                        anio=datos["anio"],
                         isbn=isbn_api,
                         editorial=datos["editorial"],
                         autor=autor,
-                        disponible=True
+                        disponible=True,
+                        stock=int(stock_openlibrary)
                     )
                     return redirect("lista_libros")
             else:
                 mensaje = "No se pudo obtener datos del ISBN o no existe en OpenLibrary."
 
     return render(request, "crear_libros.html", {
-        "autores": autores, 
+        "autores": autores,
         "mensaje": mensaje
     })
+
 
 @login_required
 def crear_prestamo(request):
     if not request.user.has_perm('gestion.gestionar_prestamos'):
         return HttpResponseForbidden()
     
-    libros = Libro.objects.filter(disponible=True)
+    libros = Libro.objects.filter(stock__gt=0)
     usuarios = User.objects.all()
     
     if request.method == 'POST':
@@ -135,14 +161,23 @@ def crear_prestamo(request):
         if libro_id and usuario_id and fecha_prestamo:
             libro = get_object_or_404(Libro, id=libro_id)
             usuario = get_object_or_404(User, id=usuario_id)
+
+            if Multa.objects.filter(prestamo__usuario=usuario, pagada=False).exists():
+                return render(request, 'crear_prestamo.html', {
+                    'libros': libros,
+                    'usuario': usuarios,
+                    'fecha': timezone.now().date().isoformat(),
+                    'error': "Este usuario tiene multas pendientes y no puede realizar nuevos préstamos."
+                })
+
             prestamo = Prestamo.objects.create(
                 libro=libro,
                 usuario=usuario,
                 fecha_prestamo=fecha_prestamo,
                 fecha_max=fecha_max
             )
-            libro.disponible = False
-            libro.save()
+
+            libro.disminuir_stock()
             return redirect('detalle_prestamo', id=prestamo.id)
     
     fecha = timezone.now().date().isoformat()  # YYYY-MM-DD
@@ -152,13 +187,16 @@ def crear_prestamo(request):
         'fecha': fecha
     })
 
+
 def detalle_prestamo(request, id):
     prestamo = get_object_or_404(Prestamo, id=id)
     return render(request, 'detalle_prestamo.html', {'prestamo': prestamo})
 
+
 def lista_multas(request):
     multas = Multa.objects.all()
     return render(request, 'multas.html', {'multas': multas})
+
 
 @login_required
 def crear_multas(request, prestamo_id=None):
@@ -182,16 +220,15 @@ def crear_multas(request, prestamo_id=None):
 
         Multa.objects.create(
             prestamo=prestamo,
+            usuario=prestamo.usuario,
             tipo=tipo,
             monto=monto,
             fecha=fecha,
             pagada=pagada
         )
 
-        # marcar el préstamo como multado para que no aparezca en pendientes
         prestamo.tiene_multa = True
         prestamo.save()
-
         return redirect("lista_multas")
 
     return render(request, "crear_multas.html", {
@@ -199,6 +236,7 @@ def crear_multas(request, prestamo_id=None):
         "prestamo_seleccionado": prestamo,
         "fecha": hoy
     })
+
 
 def registro(request):
     if request.method == 'POST':
@@ -218,16 +256,19 @@ def registro(request):
         form = UserCreationForm()
     return render(request, 'registration/registro.html', {'form': form})
 
+
 class LibroListView(LoginRequiredMixin, ListView):
     model = Libro
     template = 'gestion/templates/libro_list.html'
     context_object_name = 'libros'
     paginate_by = 3
 
+
 class LibroDetalleView(LoginRequiredMixin, DetailView):
     model = Libro
     template = 'gestion/templates/detalle_libros.html'
     context_object_name = 'libro'
+
 
 class LibroCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Libro
@@ -236,15 +277,32 @@ class LibroCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     success_url = reverse_lazy('libro_list')
     pemission_required = 'gestion.add_libro'
 
+
 class LibroUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Libro
-    fields = ['titulo', 'autor']
-    template_name =  'gestion/templates/editar_libros.html'
-    success_url = reverse_lazy('libro_list')
-    pemission_required = 'gestion.change_libro'
+    fields = ['titulo', 'anio', 'isbn', 'autor', 'editorial', 'disponible', 'stock']
+    template_name = 'editar_libros.html'
+    success_url = reverse_lazy('lista_libros')
+    permission_required = 'gestion.change_libro'
 
-class LibroUpdateView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    model = Libro
-    template_name = 'gestion/templates/delete_libros.html'
-    success_url = reverse_lazy('libro_list')
-    pemission_required = 'gestion.delete_libro'
+
+class PrestamoUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Prestamo
+    fields = ['libro', 'usuario', 'fecha_prestamo', 'fecha_max', 'fecha_devolucion', 'tiene_multa']
+    template_name = 'editar_prestamo.html'
+    success_url = reverse_lazy('lista_prestamos')
+    permission_required = 'gestion.change_prestamo'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['libros'] = Libro.objects.all()
+        context['usuarios'] = get_user_model().objects.all()
+        context['prestamo'] = self.object
+        return context
+
+class MultaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Multa
+    fields = ['prestamo', 'usuario', 'tipo', 'monto', 'pagada', 'fecha']
+    template_name = 'editar_multa.html'
+    success_url = reverse_lazy('lista_libros')
+    permission_required = 'gestion.change_libro'

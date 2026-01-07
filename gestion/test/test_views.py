@@ -12,7 +12,5 @@ class LibroLibroView(TestCase):
     def test_url_existencias(self):
         resp= self.client.get(reverse('lista_libros'))
         self.assertEqual(resp.status_code,200)
-        self.assertTemplateUsed(resp, 'gestion/templates/libros.html')
+        self.assertTemplateUsed(resp, 'gestion/templates/libros_views.html')
         self.assertEqual(len(resp.context['libros']),3)
-
-    

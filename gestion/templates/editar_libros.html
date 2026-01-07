@@ -1,0 +1,83 @@
+{% extends "index.html" %}
+
+{% block titulo_pagina %}Editar Libro{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">Modifica la información del libro seleccionado</p>
+    
+    <div>
+        <a href="{% url 'lista_libros' %}" class="btn btn-link text-muted text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Volver al catálogo
+        </a>
+    </div>
+</div>
+
+<form method="POST" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="id_titulo" class="form-label fw-medium text-secondary">Título del Libro</label>
+        <input type="text" class="form-control form-control-lg" id="id_titulo" name="titulo"
+               value="{{ libro.titulo }}" required>
+    </div>
+
+    <div class="mb-4">
+        <label for="id_autor" class="form-label fw-medium text-secondary">Autor Principal</label>
+        <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+            <select class="form-select form-select-lg" id="id_autor" name="autor" required>
+                <option value="" disabled>-- Seleccione un autor --</option>
+                {% for autor in autores %}
+                    <option value="{{ autor.id }}" {% if libro.autor.id == autor.id %}selected{% endif %}>
+                        {{ autor.nombre }} {{ autor.apellido }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label for="anio" class="form-label fw-medium text-secondary">Año de publicación</label>
+            <input type="number" class="form-control" id="anio" name="anio"
+                   value="{{ libro.anio|default:'' }}">
+        </div>
+        <div class="col-md-6">
+            <label for="stock" class="form-label fw-medium text-secondary">Stock disponible</label>
+            <input type="number" class="form-control" id="stock" name="stock"
+                   value="{{ libro.stock }}" required min="1">
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label for="isbn" class="form-label fw-medium text-secondary">ISBN</label>
+            <input type="text" class="form-control" id="isbn" name="isbn"
+                   value="{{ libro.isbn|default:'' }}">
+        </div>
+        <div class="col-md-6">
+            <label for="editorial" class="form-label fw-medium text-secondary">Editorial</label>
+            <input type="text" class="form-control" id="editorial" name="editorial"
+                   value="{{ libro.editorial|default:'' }}">
+        </div>
+    </div>
+
+    <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox" id="disponible" name="disponible"
+               {% if libro.disponible %}checked{% endif %}>
+        <label class="form-check-label text-secondary fw-medium" for="disponible">
+            Disponible para préstamo
+        </label>
+    </div>
+
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm border-0"
+                style="background-color: var(--brand-color);">
+            <i class="bi bi-save me-2"></i> Guardar Cambios
+        </button>
+    </div>
+</form>
+
+{% endblock %}

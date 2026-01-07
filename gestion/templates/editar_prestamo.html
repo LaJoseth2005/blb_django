@@ -1,0 +1,90 @@
+{% extends "index.html" %}
+
+{% block titulo_pagina %}Editar Préstamo{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-3 me-3 text-primary">
+                        <i class="bi bi-pencil-square fs-3" style="color: var(--brand-color);"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold text-dark">Editar Préstamo</h5>
+                        <small class="text-muted">Modifica los datos del préstamo seleccionado.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="libro_id" class="form-label fw-medium text-secondary">Libro Prestado</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-book"></i></span>
+                            <select class="form-select form-select-lg border-start-0 ps-0" id="libro_id" name="libro" required>
+                                <option value="" disabled>-- Seleccionar Libro --</option>
+                                {% for libro in libros %}
+                                    <option value="{{ libro.id }}" {% if prestamo.libro.id == libro.id %}selected{% endif %}>
+                                        {{ libro.titulo }} ({{ libro.autor.nombre }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="usuario_id" class="form-label fw-medium text-secondary">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person"></i></span>
+                            <select class="form-select form-select-lg border-start-0 ps-0" id="usuario_id" name="usuario" required>
+                                <option value="" disabled>-- Seleccionar Usuario --</option>
+                                {% for usuario in usuarios %}
+                                    <option value="{{ usuario.id }}" {% if prestamo.usuario.id == usuario.id %}selected{% endif %}>
+                                        {{ usuario.username }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_fecha_prestamo" class="form-label fw-medium text-secondary">Fecha de Inicio</label>
+                        <input type="date" class="form-control form-control-lg" id="id_fecha_prestamo" name="fecha_prestamo"
+                               value="{{ prestamo.fecha_prestamo|date:'Y-m-d' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_fecha_max" class="form-label fw-medium text-secondary">Fecha Límite</label>
+                        <input type="date" class="form-control form-control-lg" id="id_fecha_max" name="fecha_max"
+                               value="{{ prestamo.fecha_max|date:'Y-m-d' }}" required>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="id_tiene_multa" name="tiene_multa"
+                               {% if prestamo.tiene_multa %}checked{% endif %}>
+                        <label class="form-check-label text-secondary fw-medium" for="id_tiene_multa">
+                            ¿Tiene multa asociada?
+                        </label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm border-0"
+                                style="background-color: var(--brand-color);">
+                            <i class="bi bi-check-circle-fill me-2"></i> Guardar Cambios
+                        </button>
+                        
+                        <a href="{% url 'lista_prestamos' %}" class="btn btn-link text-muted text-decoration-none text-center">
+                            Cancelar edición
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

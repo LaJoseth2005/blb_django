@@ -3,12 +3,9 @@
 {% block titulo_pagina %}Registrar Multa{% endblock %}
 
 {% block contenido %}
-
 <div class="row justify-content-center">
     <div class="col-lg-6">
-        
         <div class="card border-0 shadow-sm">
-            
             <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
                 <div class="d-flex align-items-center">
                     <div class="rounded-circle bg-light p-3 me-3 text-danger">
@@ -22,27 +19,18 @@
             </div>
 
             <div class="card-body p-4">
-                
                 <form method="POST">
                     {% csrf_token %}
-
                     <div class="mb-3">
                         <label for="id_prestamo" class="form-label fw-medium text-secondary">Préstamo Afectado</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-journal-bookmark"></i></span>
-                            <select class="form-select form-select-lg" id="id_prestamo" name="prestamo" required>
-                                <option value="" disabled {% if not prestamo_seleccionado %}selected{% endif %}>
-                                    -- Seleccione el préstamo --
+                        <select class="form-select form-select-lg" id="id_prestamo" name="prestamo" required>
+                            <option value="" disabled {% if not prestamo_seleccionado %}selected{% endif %}>-- Seleccione el préstamo --</option>
+                            {% for p in prestamos %}
+                                <option value="{{ p.id }}" {% if prestamo_seleccionado and prestamo_seleccionado.id == p.id %}selected{% endif %}>
+                                    {{ p.libro.titulo }} - {{ p.usuario.username }} ({{ p.fecha_prestamo|date:"d/m" }})
                                 </option>
-                                {% for p in prestamos %}
-                                    <option value="{{ p.id }}" 
-                                        {% if prestamo_seleccionado and prestamo_seleccionado.id == p.id %}selected{% endif %}>
-                                        {{ p.libro.titulo }} - {{ p.usuario.username }} ({{ p.fecha_prestamo|date:"d/m" }})
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-text text-muted small">Seleccione el préstamo al cual se le cargará la deuda.</div>
+                            {% endfor %}
+                        </select>
                     </div>
 
                     <div class="row g-3">
@@ -54,49 +42,46 @@
                                 <option value="p">Pérdida del material</option>
                             </select>
                         </div>
-
                         <div class="col-md-6">
                             <label for="id_monto" class="form-label fw-medium text-secondary">Monto ($)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-white text-success fw-bold">$</span>
-                                <input type="number" step="0.01" class="form-control" id="id_monto" name="monto" 
-                                       placeholder="0.00" required>
+                                <input type="number" step="0.01" class="form-control" id="id_monto" name="monto" placeholder="0.00" required>
                             </div>
                         </div>
                     </div>
 
-                    <hr class="my-4 border-light">
-
-                    <div class="mb-3">
+                    <div class="mb-3 mt-4">
                         <label for="id_fecha" class="form-label fw-medium text-secondary">Fecha de Emisión</label>
-                        <input type="date" class="form-control" id="id_fecha" name="fecha" 
-                               value="{{ fecha|date:'Y-m-d' }}" required>
+                        <input type="date" class="form-control" id="id_fecha" name="fecha" value="{{ fecha|date:'Y-m-d' }}" required>
                     </div>
 
                     <div class="mb-4">
                         <div class="form-check form-switch p-3 bg-light rounded border">
                             <input class="form-check-input ms-0 me-3" type="checkbox" role="switch" id="id_pagada" name="pagada">
-                            <label class="form-check-label fw-bold text-dark" for="id_pagada">
-                                ¿Marcar como pagada inmediatamente?
-                            </label>
-                            <div class="small text-muted mt-1">Si se desactiva, quedará como deuda pendiente.</div>
+                            <label class="form-check-label fw-bold text-dark" for="id_pagada">¿Marcar como pagada inmediatamente?</label>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger btn-lg rounded-pill shadow-sm border-0">
-                            <i class="bi bi-file-earmark-lock me-2"></i> Confirmar Multa
-                        </button>
-                        
-                        <a href="{% url 'lista_multas' %}" class="btn btn-link text-muted text-decoration-none text-center">
-                            Cancelar
-                        </a>
+                        <button type="submit" class="btn btn-danger btn-lg rounded-pill">Confirmar Multa</button>
+                        <a href="{% url 'lista_multas' %}" class="btn btn-link text-muted">Cancelar</a>
                     </div>
-
                 </form>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    const precios = {'r': 2.50, 'd': 5.00, 'p': 15.00};
+    const selectTipo = document.getElementById('id_tipo');
+    const inputMonto = document.getElementById('id_monto');
+
+    function actualizar() {
+        inputMonto.value = (precios[selectTipo.value] || 0.00).toFixed(2);
+    }
+    selectTipo.addEventListener('change', actualizar);
+    window.addEventListener('load', actualizar);
+</script>
 {% endblock %}

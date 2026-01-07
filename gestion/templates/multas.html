@@ -3,20 +3,19 @@
 {% block titulo_pagina %}Historial de Multas{% endblock %}
 
 {% block contenido %}
-
 <div class="row justify-content-center">
     <div class="col-12">
-        
         <div class="card border-0 shadow-sm">
-            
             <div class="card-header bg-white border-0 pt-4 px-4 pb-0 mb-3">
-                <div class="d-flex align-items-center">
-                    <div class="rounded-circle bg-light p-3 me-3 text-danger">
-                        <i class="bi bi-cash-coin fs-3"></i>
-                    </div>
-                    <div>
-                        <h5 class="mb-0 fw-bold text-dark">Registro de Multas</h5>
-                        <small class="text-muted">Listado histórico de sanciones aplicadas.</small>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-light p-3 me-3 text-danger">
+                            <i class="bi bi-cash-coin fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Registro de Multas</h5>
+                            <small class="text-muted">Listado histórico de sanciones aplicadas.</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -31,7 +30,8 @@
                                 <th scope="col">Motivo / Tipo</th>
                                 <th scope="col">Fecha de Emisión</th>
                                 <th scope="col" class="text-end">Monto</th>
-                                <th scope="col" class="text-center pe-4">Estado</th>
+                                <th scope="col" class="text-center">Estado</th>
+                                <th scope="col" class="text-center pe-4">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -48,7 +48,11 @@
 
                                 <td>
                                     <span class="fw-medium text-dark">
-                                        {{ multa.usuario.get_full_name }}
+                                        {% if multa.usuario.get_full_name %}
+                                            {{ multa.usuario.get_full_name }}
+                                        {% else %}
+                                            {{ multa.usuario.username }}
+                                        {% endif %}
                                     </span>
                                 </td>
 
@@ -68,7 +72,7 @@
                                     ${{ multa.monto }}
                                 </td>
 
-                                <td class="text-center pe-4">
+                                <td class="text-center">
                                     {% if multa.pagada %}
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 border border-success border-opacity-10">
                                             <i class="bi bi-check-circle-fill me-1"></i> Pagada
@@ -79,10 +83,16 @@
                                         </span>
                                     {% endif %}
                                 </td>
+
+                                <td class="text-center pe-4">
+                                    <a href="{% url 'editar_multas' multa.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="bi bi-pencil-square me-1"></i> Editar
+                                    </a>
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-5">
+                                <td colspan="7" class="text-center py-5">
                                     <div class="text-muted opacity-50">
                                         <i class="bi bi-emoji-smile display-4 d-block mb-3"></i>
                                         ¡Excelente! No hay multas registradas en el sistema.
@@ -97,5 +107,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

@@ -1,0 +1,84 @@
+{% extends "index.html" %}
+
+{% block titulo_pagina %}Gestión de Personal{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-3 me-3 text-danger" style="color: var(--brand-color) !important;">
+                        <i class="bi bi-person-badge-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold text-dark">Registrar Nuevo Empleado</h5>
+                        <small class="text-muted">Asigna roles de Bodeguero o Bibliotecario.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body px-4 pb-4">
+                <div class="alert alert-warning border-0 small mb-4" style="background-color: #fff8f0; color: #856404;">
+                    <i class="bi bi-shield-lock-fill me-2"></i>
+                    Esta cuenta tendrá permisos administrativos sobre el sistema.
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text small">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn text-white fw-bold py-2 shadow-sm" 
+                                style="background-color: var(--brand-color); border-radius: 8px;">
+                            <i class="bi bi-person-check-fill me-2"></i> Crear Cuenta de Empleado
+                        </button>
+                        <a href="{% url 'index' %}" class="btn btn-light border-0 fw-medium py-2" style="color: #666;">
+                            Cancelar y Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"], 
+    input[type="password"], 
+    input[type="email"], 
+    select {
+        display: block;
+        width: 100%;
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    input:focus, select:focus {
+        border-color: var(--brand-color);
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(255, 123, 123, 0.25);
+    }
+</style>
+{% endblock %}

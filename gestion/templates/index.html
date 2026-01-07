@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Biblioteca - Panel de Gestión</title>
+  <title>Biblioteca - Panel de Control</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
@@ -101,64 +101,22 @@
     .card-custom {
       background: white;
       border: none;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
       padding: 30px;
       min-height: 500px;
     }
 
-    .step-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-      color: #555;
-    }
-    .step-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
+    .btn-brand {
       background-color: var(--brand-color);
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 10px;
-      font-size: 0.8rem;
-    }
-    .step-line {
-      border-left: 2px solid #ddd;
-      margin-left: 11px;
-      height: 20px;
-    }
-    
-    .btn-logout {
-        color: #777;
-        margin: 20px;
-        font-size: 0.9rem;
-    }
-    .btn-logout:hover {
-        color: var(--brand-color);
+      border: none;
+      font-weight: 600;
     }
 
-    .action-box {
-        border: 1px solid #eee;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-top: 20px;
-    }
-    .action-header {
-        background-color: var(--brand-color);
-        color: white;
-        padding: 10px 20px;
-        font-weight: 500;
-        text-align: center;
-    }
-    .action-body {
-        padding: 20px;
-        background: #fff;
-        display: flex;
-        justify-content: center;
-        gap: 15px;
+    .btn-brand:hover {
+      background-color: var(--brand-dark);
+      color: white;
     }
   </style>
 </head>
@@ -180,27 +138,29 @@
         <a href="{% url 'lista_libros' %}"><i class="bi bi-journal-bookmark"></i> Libros</a>
       </li>
 
-      <li class="{% if request.resolver_match.url_name == 'lista_autores' %}active{% endif %}">
+      <li>
         <a href="{% url 'lista_autores' %}"><i class="bi bi-person-lines-fill"></i> Autores</a>
       </li>
 
+      {% if user.is_authenticated %}
       <li>
-        <a href="{% url 'lista_multas' %}"><i class="bi bi-cash-stack"></i> Multas</a>
+        <a href="{% url 'lista_multas' %}"><i class="bi bi-cash-stack"></i> Mis Multas</a>
       </li>
       
       <li>
-        <a href="{% url 'lista_prestamos' %}"><i class="bi bi-arrow-left-right"></i> Préstamos</a>
+        <a href="{% url 'lista_prestamos' %}"><i class="bi bi-arrow-left-right"></i> Mis Préstamos</a>
       </li>
+      {% endif %}
 
-      {% if not user.is_authenticated %}
+      {% if user.is_superuser %}
       <li>
-        <a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Ingresar</a>
+        <a href="{% url 'crear_empleado' %}" class="text-danger fw-bold"><i class="bi bi-person-plus-fill"></i> Personal</a>
       </li>
       {% endif %}
     </ul>
 
     {% if user.is_authenticated %}
-    <div class="mt-auto">
+    <div class="mt-auto border-top">
         <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
             <button type="submit" class="sidebar-menu w-100 text-start ps-4 py-3 border-0 bg-transparent text-secondary">
@@ -208,59 +168,44 @@
             </button>
         </form>
     </div>
+    {% else %}
+    <div class="mt-auto border-top">
+        <a href="{% url 'login' %}" class="sidebar-menu py-3 text-secondary text-decoration-none ps-4 d-block">
+            <i class="bi bi-box-arrow-in-right me-2"></i> Ingresar
+        </a>
+    </div>
     {% endif %}
   </nav>
-
 
   <div class="content">
     
     <div class="top-header">
-       <button class="btn text-white d-md-none"><i class="bi bi-list"></i></button> <span>Gestión de Biblioteca</span>
-       
-       {% if messages %}
-       <div class="bg-white text-success px-3 py-1 rounded shadow-sm d-flex align-items-center" style="font-size: 0.9rem;">
-           {% for message in messages %}
-             <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
-           {% endfor %}
-       </div>
-       {% endif %}
+        <button class="btn text-white d-md-none"><i class="bi bi-list"></i></button> 
+        <span>Hola, <strong>{{ user.username|default:"Invitado" }}</strong></span>
+        
+        {% if messages %}
+        <div class="bg-white text-success px-3 py-1 rounded shadow-sm d-flex align-items-center" style="font-size: 0.9rem;">
+            {% for message in messages %}
+              <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 
     <div class="main-container">
-      
       <div class="card-custom">
-        <h4 class="mb-4 text-secondary">
-            {% block titulo_pagina %}Panel de Control{% endblock %}
-        </h4>
+        <h3 class="mb-4 text-dark border-bottom pb-3">
+            {% block titulo_pagina %}Panel Principal{% endblock %}
+        </h3>
 
         {% block contenido %}
-            <div class="step-item">
-                <div class="step-icon"><i class="bi bi-check"></i></div>
-                <div>Seleccione un libro (Libro activo)</div>
-            </div>
-            <div class="ms-2 border-start ps-4 pb-3" style="border-color: #ddd;"></div>
-
-            <div class="step-item">
-                <div class="step-icon">2</div>
-                <div>Configure el préstamo</div>
-            </div>
-
-            <div class="action-box w-75 mx-auto mt-4">
-                <div class="action-header">
-                    Opciones de Gestión
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <p class="lead text-muted">Bienvenido al sistema de gestión de la biblioteca. Utilice el menú lateral para navegar.</p>
                 </div>
-                <div class="action-body">
-                    <button class="btn btn-outline-danger fw-bold">+ NUEVO REGISTRO</button>
-                    <button class="btn btn-outline-secondary fw-bold"><i class="bi bi-upload"></i> IMPORTAR DATOS</button>
-                </div>
-            </div>
-            
-            <div class="text-end mt-4">
-                <button class="btn btn-outline-secondary px-4">VOLVER</button>
-            </div>
-            {% endblock %}
+             </div>
+        {% endblock %}
       </div>
-
     </div>
 
     <footer class="text-center py-3 text-muted" style="font-size: 0.8rem;">

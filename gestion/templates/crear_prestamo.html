@@ -45,7 +45,7 @@
                             <span class="input-group-text bg-white border-end-0"><i class="bi bi-person"></i></span>
                             <select class="form-select form-select-lg border-start-0 ps-0" id="usuario_id" name="usuario" required>
                                 <option value="" selected disabled>-- Seleccionar Usuario --</option>
-                                {% for usuario in usuario %}
+                                {% for usuario in usuarios %}
                                     <option value="{{usuario.id}}">{{usuario.username}}</option>
                                 {% endfor %}
                             </select> </div>

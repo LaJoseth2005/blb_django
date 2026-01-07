@@ -17,7 +17,7 @@ urlpatterns = [
     path("password/change/done", auth_views.PasswordChangeDoneView.as_view(), name="password_change_done"),
 
     # Registro
-    path("registro/", views.registro, name="registro"),
+    path("registro/", views.registro_cliente, name="registro"),
 
     # Libros
     path("libros/", views.lista_libros, name="lista_libros"),
@@ -30,16 +30,22 @@ urlpatterns = [
     path("autores/nuevo/", views.crear_autores, name="crear_autores"),
     path("autores/<int:id>/editar/", views.crear_autores, name="editar_autor"),
 
-    # Prestamos
+    # Prestamos 
     path("prestamos/", views.lista_prestamos, name="lista_prestamos"),
     path("prestamos/nuevo/", views.crear_prestamo, name="crear_prestamo"),
+    path("prestamos/solicitar/<int:libro_id>/", views.solicitar_prestamo_cliente, name="solicitar_prestamo_cliente"),
+    path("prestamos/aprobar/<int:id>/", views.aprobar_prestamo, name="aprobar_prestamo"),
     path("prestamos/<int:id>", views.detalle_prestamo, name="detalle_prestamo"),
     path("prestamos/<int:id>/devolver/", views.devolver_prestamo, name="devolver_prestamo"),
     path("prestamos/<int:pk>/editar_prestamo", views.PrestamoUpdateView.as_view(), name="editar_prestamo"),
 
     # Multas
     path("multas/", views.lista_multas, name="lista_multas"),
+    path("multas/pagar/<int:id>/", views.pagar_multa, name="pagar_multa"),
     path("multas/nuevo/", views.crear_multas, name="crear_multas_sin_id"),
     path("multas/nuevo/<int:prestamo_id>", views.crear_multas, name="crear_multas"),
     path("multas/<int:pk>/editar_multas", views.MultaUpdateView.as_view(), name="editar_multas"),
+
+    # Admin
+    path('admin-biblioteca/nuevo-empleado/', views.crear_empleado, name='crear_empleado'),
 ]

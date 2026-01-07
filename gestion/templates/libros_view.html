@@ -8,10 +8,12 @@
     <p class="text-muted mb-0">Inventario bibliográfico disponible</p>
     
     <div>
+        {% if perms.gestion.add_libro %}
         <a href="{% url 'crear_libros' %}" class="btn text-white rounded-pill px-4 shadow-sm" 
-           style="background-color: var(--brand-color, #0d6efd);">
-           <i class="bi bi-book me-1"></i> Nuevo Libro
+           style="background-color: var(--brand-color, #ff7b7b);">
+            <i class="bi bi-book me-1"></i> Nuevo Libro
         </a>
+        {% endif %}
     </div>
 </div>
 
@@ -21,12 +23,16 @@
             <tr>
                 <th scope="col" class="ps-3">Libro</th>
                 <th scope="col">Autor</th>
-                <th scope="col">Editorial</th>
-                <th scope="col">ISBN</th>
                 <th scope="col">Stock</th>
-                <th scope="col">Publicación</th>
                 <th scope="col" class="text-center">Estado</th>
+                
+                {% if not perms.gestion.change_libro %}
+                <th scope="col" class="text-center">Solicitud</th>
+                {% endif %}
+
+                {% if perms.gestion.change_libro %}
                 <th scope="col" class="text-end pe-3">Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -44,6 +50,7 @@
                         </div>
                         <div>
                             <h6 class="mb-0 fw-bold text-dark text-capitalize">{{ libro.titulo }}</h6>
+                            <small class="text-muted">{{ libro.editorial|default:"Sin editorial" }}</small>
                         </div>
                     </div>
                 </td>
@@ -54,43 +61,38 @@
                     </span>
                 </td>
 
-                <td>
-                    <span class="text-muted">{{ libro.editorial|default:"—" }}</span>
-                </td>
-
-                <td>
-                    <span class="text-muted">{{ libro.isbn|default:"—" }}</span>
-                </td>
-
-                <td>
-                    <span class="fw-bold text-dark">{{ libro.stock }}</span>
-                </td>
-
-                <td>
-                    <small class="text-muted">
-                        <i class="bi bi-calendar3 me-1"></i>
-                        {{ libro.anio|default:"—" }}
-                    </small>
-                </td>
+                <td><span class="fw-bold {% if libro.stock > 0 %}text-dark{% else %}text-danger{% endif %}">{{ libro.stock }}</span></td>
 
                 <td class="text-center">
-                    {% if libro.disponible %}
-                        <span class="badge bg-success bg-opacity-10 text-success px-3 rounded-pill">
-                            Disponible
-                        </span>
+                    {% if libro.stock > 0 %}
+                        <span class="badge bg-success bg-opacity-10 text-success px-3 rounded-pill">Disponible</span>
                     {% else %}
-                        <span class="badge bg-danger bg-opacity-10 text-danger px-3 rounded-pill">
-                            Prestado
-                        </span>
+                        <span class="badge bg-danger bg-opacity-10 text-danger px-3 rounded-pill">Agotado</span>
                     {% endif %}
                 </td>
 
+                {% if not perms.gestion.change_libro %}
+                <td class="text-center">
+                    {% if libro.stock > 0 %}
+                        <a href="{% url 'solicitar_prestamo_cliente' libro.id %}" 
+                           class="btn btn-sm text-white rounded-pill px-3" 
+                           style="background-color: #5bc0de;">
+                            <i class="bi bi-hand-index-thumb me-1"></i> Solicitar
+                        </a>
+                    {% else %}
+                        <button class="btn btn-sm btn-light rounded-pill px-3" disabled>No disponible</button>
+                    {% endif %}
+                </td>
+                {% endif %}
+
+                {% if perms.gestion.change_libro %}
                 <td class="text-end pe-3">
                     <a href="{% url 'editar_libros' libro.id %}" 
                        class="btn btn-sm btn-outline-primary rounded-pill px-3">
                         <i class="bi bi-pencil-square me-1"></i> Editar
                     </a>
                 </td>
+                {% endif %}
             </tr>
             {% empty %}
             <tr>

@@ -7,16 +7,24 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h5 class="mb-0 text-dark fw-bold">Control de Préstamos</h5>
-        <p class="text-muted mb-0 small">Administra las salidas y devoluciones de libros.</p>
+        <p class="text-muted mb-0 small">
+            {% if perms.gestion.change_prestamo %}
+                Administra las salidas y devoluciones de libros de todos los usuarios.
+            {% else %}
+                Sigue el estado de tus solicitudes de libros.
+            {% endif %}
+        </p>
     </div>
     
+    {% if perms.gestion.add_prestamo %}
     <div class="d-flex gap-2">
         <a href="{% url 'crear_prestamo' %}" 
         class="btn text-white rounded-pill px-4 shadow-sm"  
-        style="background-color: var(--brand-color);">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Préstamo
+        style="background-color: #e65b5b;">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Préstamo Directo
         </a>
     </div>
+    {% endif %}
 </div>
 
 <div class="table-responsive">
@@ -39,14 +47,14 @@
                         <div class="rounded bg-light p-2 me-2 text-primary">
                             <i class="bi bi-book"></i>
                         </div>
-                        <span class="fw-bold text-dark">{{ prestamo.libro }}</span>
+                        <span class="fw-bold text-dark">{{ prestamo.libro.titulo }}</span>
                     </div>
                 </td>
 
                 <td>
                     <div class="d-flex align-items-center">
                         <i class="bi bi-person-circle text-secondary me-2"></i>
-                        {{ prestamo.usuario }}
+                        {{ prestamo.usuario.username }}
                     </div>
                 </td>
 
@@ -58,13 +66,17 @@
                 </td>
 
                 <td class="text-center">
-                    {% if prestamo.fecha_devolucion %}
+                    {% if prestamo.estado == 'solicitado' %}
+                        <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3">
+                            Esperando Aprobación
+                        </span>
+                    {% elif prestamo.fecha_devolucion %}
                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">
                             Devuelto: {{ prestamo.fecha_devolucion|date:"d M" }}
                         </span>
                     {% else %}
                         <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">
-                            Pendiente
+                            Activo / En posesión
                         </span>
                     {% endif %}
                 </td>
@@ -74,21 +86,28 @@
                         <div class="text-danger fw-bold">
                             {{ prestamo.dias_retraso }} días
                         </div>
-                        <small class="text-muted" style="font-size: 0.75rem;">
-                            Multa est: ${{ prestamo.multa_retraso }}
-                        </small>
                     {% else %}
                         <span class="text-muted small">-</span>
                     {% endif %}
                 </td>
 
                 <td class="text-end pe-3">
+                    {% if perms.gestion.change_prestamo %}
                     <div class="dropdown">
                         <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                            {% if not prestamo.fecha_devolucion %}
+                            
+                            {% if prestamo.estado == 'solicitado' %}
+                            <li>
+                                <a class="dropdown-item text-primary fw-bold" href="{% url 'aprobar_prestamo' prestamo.id %}">
+                                    <i class="bi bi-check-all me-2"></i> APROBAR PEDIDO
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% if not prestamo.fecha_devolucion and prestamo.estado == 'aprobado' %}
                             <li>
                                 <a class="dropdown-item text-success" href="{% url 'devolver_prestamo' prestamo.id %}">
                                     <i class="bi bi-check2-circle me-2"></i> Marcar Devuelto
@@ -97,21 +116,26 @@
                             {% endif %}
                             
                             <li>
-                                <a class="dropdown-item text-primary" href="{% url 'editar_prestamo' prestamo.id %}">
-                                    <i class="bi bi-pencil-square me-2"></i> Editar Préstamo
+                                <a class="dropdown-item text-dark" href="{% url 'editar_prestamo' prestamo.id %}">
+                                    <i class="bi bi-pencil-square me-2"></i> Editar Fechas
                                 </a>
                             </li>
 
-                            <li class="list-group-item px-0 border-0">
-                                <a href="{% url 'crear_multas' prestamo.id %}" 
-                                class="btn btn-sm btn-danger rounded-pill shadow-sm d-flex align-items-center gap-2"
-                                style="background-color: var(--brand-color);">
-                                    <i class="bi bi-cash"></i>
-                                    Aplicar Multa
+                            {% if not prestamo.tiene_multa and not prestamo.fecha_devolucion %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'crear_multas' prestamo.id %}">
+                                    <i class="bi bi-cash me-2"></i> Aplicar Multa
                                 </a>
                             </li>
+                            {% endif %}
                         </ul>
                     </div>
+                    {% else %}
+                        <span class="text-muted small">Pendiente de revisión</span>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}
@@ -119,7 +143,7 @@
                 <td colspan="6" class="text-center py-5">
                     <div class="text-muted">
                         <i class="bi bi-inbox display-4 d-block mb-3"></i>
-                        No hay préstamos registrados.
+                        No hay préstamos activos o solicitudes en curso.
                     </div>
                 </td>
             </tr>

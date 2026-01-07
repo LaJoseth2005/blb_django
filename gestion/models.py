@@ -54,13 +54,19 @@ class Libro(models.Model):
 
 
 class Prestamo(models.Model):
+    estados = [
+        ('solicitado', 'Solicitado'),
+        ('aprobado', 'Aprobado'),
+        ('devuelto', 'Devuelto'),
+    ]
+
     libro = models.ForeignKey(Libro, related_name="prestamos", on_delete=models.PROTECT)
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="prestamos", on_delete=models.PROTECT)
     fecha_prestamo = models.DateField(default=timezone.now)
     fecha_max = models.DateField(default=timezone.now)
     fecha_devolucion = models.DateField(blank=True, null=True)
     tiene_multa = models.BooleanField(default=False)
-
+    estado = models.CharField(max_length=20, choices=estados, default='solicitado')
 
     class Meta:
         permissions = (
@@ -69,42 +75,7 @@ class Prestamo(models.Model):
         )
 
     def __str__(self):
-        return f"Préstamo de {self.libro} a {self.usuario}"
-
-    @property
-    def dias_retraso(self):
-        hoy = timezone.now().date()
-        fecha_ref = self.fecha_devolucion or hoy
-        if fecha_ref > self.fecha_max:
-            return (fecha_ref - self.fecha_max).days
-        return 0
-
-    @property
-    def multa_retraso(self):
-        tarifa = 0.50
-        return self.dias_retraso * tarifa
-
-    @property
-    def multa_perdida(self):
-        tarifa = 2.00
-        return self.dias_retraso * tarifa
-
-    @property
-    def multa_deterioro(self):
-        tarifa = 4.00
-        return self.dias_retraso * tarifa
-
-    def devolver(self, fecha=None):
-        self.fecha_devolucion = fecha or timezone.now().date()
-        self.libro.disponible = True
-        self.libro.save()
-        self.save()
-
-    def generar_multa(self, tipo):
-        return Multa.objects.create(
-            prestamo=self,
-            tipo=tipo
-        )
+        return f"Préstamo de {self.libro} a {self.usuario} ({self.get_estado_display()})"
 
 class Multa(models.Model):
     prestamo = models.ForeignKey(Prestamo, related_name="multas", on_delete=models.PROTECT)

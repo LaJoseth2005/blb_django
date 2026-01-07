@@ -14,7 +14,13 @@
                         </div>
                         <div>
                             <h5 class="mb-0 fw-bold text-dark">Registro de Multas</h5>
-                            <small class="text-muted">Listado histórico de sanciones aplicadas.</small>
+                            <small class="text-muted">
+                                {% if perms.gestion.change_multa %}
+                                    Listado histórico de sanciones aplicadas a todos los usuarios.
+                                {% else %}
+                                    Tus sanciones aplicadas y estados de pago.
+                                {% endif %}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -85,9 +91,21 @@
                                 </td>
 
                                 <td class="text-center pe-4">
-                                    <a href="{% url 'editar_multas' multa.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                        <i class="bi bi-pencil-square me-1"></i> Editar
-                                    </a>
+                                    {% if not multa.pagada and multa.usuario == user %}
+                                        <a href="{% url 'pagar_multa' multa.id %}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                                            <i class="bi bi-wallet2 me-1"></i> Pagar Ahora
+                                        </a>
+                                    {% endif %}
+
+                                    {% if perms.gestion.change_multa %}
+                                        <a href="{% url 'editar_multas' multa.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-1">
+                                            <i class="bi bi-pencil-square me-1"></i> Editar
+                                        </a>
+                                    {% endif %}
+
+                                    {% if multa.pagada and multa.usuario != user and not perms.gestion.change_multa %}
+                                        <span class="text-muted small">Sin acciones</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% empty %}

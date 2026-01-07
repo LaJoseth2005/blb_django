@@ -48,4 +48,9 @@ urlpatterns = [
 
     # Admin
     path('admin-biblioteca/nuevo-empleado/', views.crear_empleado, name='crear_empleado'),
+
+    #Multas
+    path("reportes/pdf/libros-prestados/", views.reporte_prestamos_pdf, name="pdf_libros_prestados"),
+    path("reportes/pdf/multas-general/", views.reporte_multas_pdf, name="pdf_multas_general"),
+    path("reportes/pdf/multas-por-usuario/", views.reporte_usuarios_detalle_pdf, name="pdf_multas_detalle"),
 ]

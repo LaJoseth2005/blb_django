@@ -1,11 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User, Permission
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login, get_user_model
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.conf import settings
@@ -287,6 +290,59 @@ def crear_multas(request, prestamo_id=None):
         "prestamo_seleccionado": prestamo,
         "fecha": timezone.now().date()
     })
+
+
+def render_to_pdf(template_src, context_dict):
+    """Función de utilidad para convertir HTML en PDF"""
+    template = get_template(template_src)
+    html  = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="reporte_biblioteca.pdf"'
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+       return HttpResponse('Error técnico al generar el reporte PDF', status=500)
+    return response
+
+def es_admin_o_staff(user):
+    """Retorna True si el usuario es staff o pertenece al grupo 'Administrador'"""
+    return user.is_authenticated and (user.is_staff or user.groups.filter(name='Administrador').exists())
+
+@login_required
+@user_passes_test(es_admin_o_staff)
+def reporte_prestamos_pdf(request):
+    items = Prestamo.objects.filter(fecha_devolucion__isnull=True).select_related('libro', 'usuario')
+    data = {
+        'titulo_reporte': 'INFORME DE LIBROS PRESTADOS (CIRCULACIÓN)',
+        'items': items,
+        'fecha': timezone.now().date(),
+        'tipo': 'prestamos'
+    }
+    return render_to_pdf('pdf_base.html', data)
+
+@login_required
+@user_passes_test(es_admin_o_staff)
+def reporte_multas_pdf(request):
+    items = Multa.objects.all().select_related('usuario', 'prestamo')
+    data = {
+        'titulo_reporte': 'REPORTE GENERAL DE MULTAS EXISTENTES',
+        'items': items,
+        'fecha': timezone.now().date(),
+        'tipo': 'multas_general'
+    }
+    return render_to_pdf('pdf_base.html', data)
+
+@login_required
+@user_passes_test(es_admin_o_staff)
+def reporte_usuarios_detalle_pdf(request):
+    usuarios = User.objects.filter(multa__isnull=False).distinct().prefetch_related('multa_set')
+    data = {
+        'titulo_reporte': 'DETALLE DE MULTAS POR CADA USUARIO',
+        'usuarios_list': usuarios,
+        'fecha': timezone.now().date(),
+        'tipo': 'usuarios_detalle'
+    }
+    return render_to_pdf('pdf_base.html', data)
 
 
 class LibroListView(LoginRequiredMixin, ListView):

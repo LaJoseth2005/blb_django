@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User, Group
 
-# Registro para el Cliente (Abierto al público)
 class RegistroClienteForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     
@@ -15,7 +14,6 @@ class RegistroClienteForm(forms.ModelForm):
         if commit: user.save()
         return user
 
-# Registro para el Superusuario (Crear empleados)
 class RegistroEmpleadosForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     rol = forms.ModelChoiceField(

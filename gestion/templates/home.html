@@ -55,4 +55,41 @@
     }
 </style>
 
+{% if user.is_staff or user.groups.all.0.name == 'Administrador' %}
+<div class="container pb-5">
+    <hr class="my-5 opacity-25">
+    <div class="card border-0 shadow-sm rounded-4" style="background-color: #f8f9fa;">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-4">
+                <div class="rounded-circle p-3 me-3" style="background-color: #ff7b7b22;">
+                    <i class="bi bi-file-earmark-pdf-fill fs-3" style="color: #e65b5b;"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold">Panel de Reportes Administrativos</h4>
+                    <small class="text-muted">Generación de informes oficiales en formato PDF</small>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="{% url 'pdf_libros_prestados' %}" class="btn btn-white border w-100 py-3 rounded-3 shadow-sm text-start" target="_blank">
+                        <i class="bi bi-journal-check text-danger me-2"></i> Libros Prestados
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'pdf_multas_general' %}" class="btn btn-white border w-100 py-3 rounded-3 shadow-sm text-start" target="_blank">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i> Multas Generales
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'pdf_multas_detalle' %}" class="btn btn-white border w-100 py-3 rounded-3 shadow-sm text-start" target="_blank">
+                        <i class="bi bi-people text-danger me-2"></i> Multas por Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

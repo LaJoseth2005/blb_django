@@ -12,6 +12,9 @@ from xhtml2pdf import pisa
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.conf import settings
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from .serializers import LibroSerializer
 
 from .models import Autor, Libro, Prestamo, Multa
 from .forms import RegistroClienteForm, RegistroEmpleadosForm 
@@ -21,6 +24,21 @@ from .openlibrary import obtener_datos_por_isbn
 def index(request):
     title = settings.TITLE
     return render(request, 'home.html', {'titulo': title})
+
+
+class LibroViewSet(viewsets.ModelViewSet):
+    queryset = Libro.objects.all()
+    serializer_class = LibroSerializer
+    lookup_field = 'isbn' # Buscaremos por ISBN en lugar de ID
+
+    def retrieve(self, request, *args, **kwargs):
+        isbn = kwargs.get('isbn')
+        try:
+            libro = Libro.objects.get(isbn=isbn)
+            serializer = self.get_serializer(libro)
+            return Response(serializer.data)
+        except Libro.DoesNotExist:
+            return Response({"error": "No encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
 def lista_libros(request):
     libros = Libro.objects.all()

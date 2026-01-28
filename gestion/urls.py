@@ -2,8 +2,19 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import LibroViewSet
+
+router = DefaultRouter()
+router.register(r'api-libros', LibroViewSet, basename='api-libros')
+
+
 urlpatterns = [
     path("", views.index, name="index"),
+
+    #Conexion
+    path('', include(router.urls)),
 
     # Path class view
     path("libros_list/", views.LibroListView.as_view(), name="libro_list"),

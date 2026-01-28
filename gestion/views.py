@@ -15,6 +15,8 @@ from django.conf import settings
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .serializers import LibroSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.authentication import TokenAuthentication
 
 from .models import Autor, Libro, Prestamo, Multa
 from .forms import RegistroClienteForm, RegistroEmpleadosForm 
@@ -30,6 +32,14 @@ class LibroViewSet(viewsets.ModelViewSet):
     queryset = Libro.objects.all()
     serializer_class = LibroSerializer
     lookup_field = 'isbn'
+
+class LibroViewSet(viewsets.ModelViewSet):
+    queryset = Libro.objects.all()
+    serializer_class = LibroSerializer
+    lookup_field = 'isbn'
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def retrieve(self, request, *args, **kwargs):
         isbn = kwargs.get('isbn')

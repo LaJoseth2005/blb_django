@@ -29,7 +29,7 @@ def index(request):
 class LibroViewSet(viewsets.ModelViewSet):
     queryset = Libro.objects.all()
     serializer_class = LibroSerializer
-    lookup_field = 'isbn' # Buscaremos por ISBN en lugar de ID
+    lookup_field = 'isbn'
 
     def retrieve(self, request, *args, **kwargs):
         isbn = kwargs.get('isbn')

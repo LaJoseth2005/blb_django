@@ -64,7 +64,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8069'] # Puertos comunes de Odoo
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8069']
 
 ROOT_URLCONF = 'blb_django.urls'
 
